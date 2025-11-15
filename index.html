@@ -28,72 +28,246 @@
   </header>
 
   <main class="max-w-5xl mx-auto px-4 py-8 print-bg">
+    <!-- 主页视图 -->
     <section id="view-home" class="space-y-8">
       <div class="space-y-2">
-        <h1 class="text-2xl font-bold">选择量表</h1>
-        <p class="text-gray-600">以下量表仅用于科普与自我筛查，不能替代专业诊断与治疗。</p>
+        <h1 class="text-2xl font-bold">心理健康评估中心</h1>
+        <p class="text-gray-600">科学、专业的心理健康自测工具，帮助您了解和改善心理健康状态。</p>
       </div>
-      <div id="cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+      <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       <div id="history-block" class="space-y-3">
-        <h2 class="text-xl font-semibold">历史记录</h2>
-        <div id="history-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        <h2 class="text-xl font-semibold">评估历史</h2>
+        <div id="history-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
       </div>
     </section>
 
+    <!-- 测试视图 -->
     <section id="view-test" class="hidden">
-      <div class="flex items-center justify-between mb-4">
-        <button id="backHomeFromTest" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">返回首页</button>
-      </div>
-      <div class="space-y-6">
-        <div>
-          <h2 id="test-title" class="text-2xl font-bold"></h2>
-          <p id="test-desc" class="text-gray-600 mt-1"></p>
-        </div>
-        <div>
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div id="progress-bar" class="h-2 bg-emerald-500 rounded-full" style="width:0%"></div>
+      <div class="flex items-center justify-between mb-6">
+        <button id="backHomeFromTest" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          返回首页
+        </button>
+        <div class="flex items-center space-x-2">
+          <div class="text-sm text-gray-600">进度</div>
+          <div class="w-32 bg-gray-200 rounded-full h-2">
+            <div id="progress-bar" class="h-2 bg-emerald-500 rounded-full transition-all duration-300" style="width:0%"></div>
           </div>
-          <div id="progress-text" class="text-sm text-gray-600 mt-1"></div>
+          <div id="progress-text" class="text-sm text-gray-600">0/0</div>
         </div>
+      </div>
+      
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="mb-6">
+          <h2 id="test-title" class="text-2xl font-bold text-gray-900"></h2>
+          <p id="test-desc" class="text-gray-600 mt-2"></p>
+        </div>
+        
         <form id="questions-form" class="space-y-6"></form>
-        <div class="flex items-center gap-3 no-print">
-          <button id="submit-btn" class="inline-flex items-center px-4 py-2 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50" disabled>提交并查看结果</button>
-          <button id="reset-btn" type="button" class="inline-flex items-center px-3 py-2 rounded-md bg-white border border-gray-300 hover:bg-gray-50">清空选择</button>
+        
+        <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+          <button id="reset-btn" type="button" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+            清空选择
+          </button>
+          <button id="submit-btn" class="inline-flex items-center px-6 py-2 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
+            提交并查看结果
+          </button>
         </div>
       </div>
     </section>
 
+    <!-- 结果视图 -->
     <section id="view-result" class="hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <button id="backHomeFromResult" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">返回首页</button>
-          <button id="retakeBtn" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">重新作答</button>
+      <div class="flex items-center justify-between mb-6">
+        <button id="backHomeFromResult" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          返回首页
+        </button>
+        <div class="flex items-center space-x-2 no-print">
+          <button id="retakeBtn" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
+            重新作答
+          </button>
+          <button id="printBtn" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            打印/保存 PDF
+          </button>
         </div>
-        <button id="printBtn" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">打印/保存 PDF</button>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
+      
+      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 id="result-title" class="text-2xl font-bold"></h2>
+            <h2 id="result-title" class="text-2xl font-bold text-gray-900"></h2>
             <p class="text-gray-600 mt-1">结果仅供参考，如有困扰请尽快寻求专业帮助。</p>
           </div>
           <div class="text-right">
-            <div id="result-score" class="text-3xl font-bold"></div>
-            <div id="result-severity" class="mt-1 inline-block px-2 py-1 rounded text-sm"></div>
+            <div id="result-score" class="text-3xl font-bold text-gray-900"></div>
+            <div id="result-severity" class="mt-2 inline-block px-3 py-1 rounded text-sm"></div>
           </div>
         </div>
+        
         <div id="safety-note" class="hidden rounded-lg border border-red-200 bg-red-50 text-red-800 p-4"></div>
+        
         <div>
-          <h3 class="font-semibold mb-2">建议</h3>
-          <div id="result-advice" class="prose prose-sm max-w-none"></div>
+          <h3 class="font-semibold text-gray-900 mb-3">建议与指导</h3>
+          <div id="result-advice" class="prose prose-sm max-w-none text-gray-700"></div>
         </div>
+        
         <div>
-          <h3 class="font-semibold mb-2">参考文献</h3>
-          <ul id="result-citations" class="list-disc pl-5 space-y-1"></ul>
+          <h3 class="font-semibold text-gray-900 mb-3">参考文献</h3>
+          <ul id="result-citations" class="list-disc pl-5 space-y-2 text-sm"></ul>
         </div>
+        
         <div>
-          <h3 class="font-semibold mb-2">作答明细</h3>
-          <div id="result-detail" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+          <h3 class="font-semibold text-gray-900 mb-3">作答明细</h3>
+          <div id="result-detail" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 健康仪表板视图 -->
+    <section id="view-dashboard" class="hidden">
+      <div class="flex items-center justify-between mb-6">
+        <button id="backHomeFromDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          返回首页
+        </button>
+        <div class="flex items-center space-x-2">
+          <button id="exportDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            导出报告
+          </button>
+          <button id="refreshDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            刷新数据
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-2xl font-bold text-gray-900">心理健康仪表板</h2>
+          <div class="text-sm text-gray-600">
+            数据更新时间: <span id="dashboard-update-time">--</span>
+          </div>
+        </div>
+        <p class="text-gray-600">综合展示您的心理健康状况和多维度分析，帮助您更好地了解自己的心理状态。</p>
+      </div>
+      
+      <!-- 仪表板统计卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">总体心理健康</p>
+              <p id="overall-wellbeing" class="text-2xl font-bold text-gray-900">--</p>
+            </div>
+            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">抑郁风险</p>
+              <p id="depression-risk" class="text-2xl font-bold text-gray-900">--</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">焦虑水平</p>
+              <p id="anxiety-level" class="text-2xl font-bold text-gray-900">--</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">压力指数</p>
+              <p id="stress-index" class="text-2xl font-bold text-gray-900">--</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 图表区域 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">心理健康趋势</h3>
+          <div id="mental-health-trend-chart" class="h-64"></div>
+        </div>
+        
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">多维度评估雷达图</h3>
+          <div id="wellbeing-radar-chart" class="h-64"></div>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">各量表得分对比</h3>
+          <div id="scale-comparison-chart" class="h-64"></div>
+        </div>
+        
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">情绪热力图</h3>
+          <div id="emotion-heatmap" class="h-64"></div>
+        </div>
+      </div>
+      
+      <!-- 详细数据表格 -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">历史评估记录</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">评估日期</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">量表类型</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">得分</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">严重程度</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">建议</th>
+              </tr>
+            </thead>
+            <tbody id="assessment-history-tbody" class="bg-white divide-y divide-gray-200">
+              <!-- 历史记录将通过JavaScript动态生成 -->
+            </tbody>
+          </table>
         </div>
       </div>
     </section>

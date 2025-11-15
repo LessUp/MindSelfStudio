@@ -1,0 +1,39 @@
+{
+  "name": "mindself-studio",
+  "version": "2.0.0",
+  "description": "心理健康评估平台 - 集成DASS-21、WHO-5、EMA和数据可视化功能",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage",
+    "test:verbose": "node --experimental-vm-modules node_modules/.bin/jest --verbose",
+    "lint": "eslint src tests --ext .js",
+    "serve": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 3000"
+  },
+  "keywords": [
+    "心理健康",
+    "心理评估",
+    "DASS-21",
+    "WHO-5",
+    "EMA",
+    "数据可视化",
+    "Chart.js"
+  ],
+  "author": "MindSelf Studio Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@jest/globals": "^29.7.0",
+    "babel-jest": "^29.7.0",
+    "eslint": "^8.52.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  }
+}
