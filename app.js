@@ -1,548 +1,393 @@
+// MindSelf Studio v2.0
+const CATEGORIES = {
+  all: { name: '全部', icon: '📋' }, depression: { name: '抑郁', icon: '🌧️' },
+  anxiety: { name: '焦虑', icon: '😰' }, stress: { name: '压力', icon: '💫' },
+  self: { name: '自我', icon: '🪞' }, sleep: { name: '睡眠', icon: '😴' }, wellbeing: { name: '幸福', icon: '🌈' }
+};
+
 const SCALES = {
-  phq9: {
-    id: 'phq9',
-    title: 'PHQ-9 抑郁筛查量表',
-    desc: '过去两周内下列问题在多大程度上困扰你。',
-    options: ['一点也没有(0)', '几天(1)', '一半以上的天数(2)', '几乎每天(3)'],
-    questions: [
-      { id: 1, text: '做事时提不起劲或没有兴趣' },
-      { id: 2, text: '感到心情低落、沮丧或绝望' },
-      { id: 3, text: '入睡困难、易醒或睡眠过多' },
-      { id: 4, text: '感到疲倦或没有活力' },
-      { id: 5, text: '食欲不振或吃得过多' },
-      { id: 6, text: '觉得自己很糟糕，或觉得自己失败了，或让自己或家人失望' },
-      { id: 7, text: '对事情专注有困难，例如读报或看电视时' },
-      { id: 8, text: '动作或说话比平时缓慢，或相反，坐立不安、动来动去' },
-      { id: 9, text: '有不如死了或以某种方式伤害自己的念头' }
-    ]
-  },
-  gad7: {
-    id: 'gad7',
-    title: 'GAD-7 广泛性焦虑量表',
-    desc: '过去两周内下列问题在多大程度上困扰你。',
-    options: ['一点也没有(0)', '几天(1)', '一半以上的天数(2)', '几乎每天(3)'],
-    questions: [
-      { id: 1, text: '感到紧张、焦虑或烦躁' },
-      { id: 2, text: '无法停止或控制担忧' },
-      { id: 3, text: '对各种不同的事情过度担忧' },
-      { id: 4, text: '很难放松下来' },
-      { id: 5, text: '因焦虑而坐立不安、难以静坐' },
-      { id: 6, text: '容易烦恼或易怒' },
-      { id: 7, text: '感到害怕，好像会发生不好的事情' }
-    ]
-  },
-  pss10: {
-    id: 'pss10',
-    title: 'PSS-10 主观压力量表',
-    desc: '在过去一个月里，你对以下情况的感觉与想法。',
-    options: ['从不(0)', '很少(1)', '有时(2)', '经常(3)', '总是(4)'],
-    questions: [
-      { id: 1, text: '因为意外发生的事情而感到心烦意乱' },
-      { id: 2, text: '觉得自己无法控制生活中的重要事情' },
-      { id: 3, text: '感到紧张和压力' },
-      { id: 4, text: '对自己个人的事情感到自信', reverse: true },
-      { id: 5, text: '觉得事情进展顺利', reverse: true },
-      { id: 6, text: '觉得无法应付你必须要做的一切' },
-      { id: 7, text: '能够控制烦恼', reverse: true },
-      { id: 8, text: '觉得事情都在按照你的意愿进行', reverse: true },
-      { id: 9, text: '因为事情超出你的控制而感到生气' },
-      { id: 10, text: '觉得困难堆积如山，无法克服' }
-    ]
-  }
+  phq9: { id: 'phq9', category: 'depression', title: 'PHQ-9 抑郁筛查', shortTitle: 'PHQ-9', desc: '过去两周内下列问题困扰程度', icon: '🌧️', color: 'blue', time: 3, options: ['完全没有', '几天', '一半以上', '几乎每天'], questions: ['做事时提不起劲或没有兴趣', '感到心情低落、沮丧或绝望', '入睡困难、易醒或睡眠过多', '感到疲倦或没有活力', '食欲不振或吃得过多', '觉得自己很糟糕或让家人失望', '对事情专注有困难', '动作或说话比平时缓慢，或坐立不安', '有不如死了或伤害自己的念头'], citation: 'Kroenke K, et al. The PHQ-9. 2001.' },
+  gad7: { id: 'gad7', category: 'anxiety', title: 'GAD-7 焦虑量表', shortTitle: 'GAD-7', desc: '过去两周内下列问题困扰程度', icon: '😰', color: 'purple', time: 2, options: ['完全没有', '几天', '一半以上', '几乎每天'], questions: ['感到紧张、焦虑或烦躁', '无法停止或控制担忧', '对各种事情过度担忧', '很难放松下来', '因焦虑而坐立不安', '容易烦恼或易怒', '感到害怕，好像会发生不好的事'], citation: 'Spitzer RL, et al. The GAD-7. 2006.' },
+  pss10: { id: 'pss10', category: 'stress', title: 'PSS-10 压力量表', shortTitle: 'PSS-10', desc: '过去一个月的感受与想法', icon: '💫', color: 'orange', time: 4, options: ['从不', '很少', '有时', '经常', '总是'], questions: ['因意外事情感到心烦', '觉得无法控制生活重要事情', '感到紧张和压力', { text: '对个人事情感到自信', reverse: true }, { text: '觉得事情进展顺利', reverse: true }, '觉得无法应付要做的事', { text: '能够控制烦恼', reverse: true }, { text: '觉得事情按意愿进行', reverse: true }, '因事情超出控制而生气', '觉得困难堆积如山'], citation: 'Cohen S. 1983.' },
+  sds: { id: 'sds', category: 'depression', title: 'SDS 抑郁自评', shortTitle: 'SDS', desc: '最近一周的感受', icon: '🌧️', color: 'blue', time: 5, options: ['没有或很少', '小部分时间', '相当多时间', '绝大部分时间'], questions: ['我觉得闷闷不乐', { text: '早晨感觉最好', reverse: true }, '我一阵阵地哭或想哭', '我晚上睡眠不好', { text: '我吃的跟平常一样多', reverse: true }, { text: '与异性接触感到愉快', reverse: true }, '我发觉体重在下降', '我有便秘苦恼', '我心跳比平常快', '我无缘无故感到疲乏', { text: '我头脑像平常一样清楚', reverse: true }, { text: '做事情并没有困难', reverse: true }, '我不安而平静不下来', { text: '我对将来抱有希望', reverse: true }, '我比平常容易激动', { text: '我觉得作出决定很容易', reverse: true }, { text: '我觉得自己有用', reverse: true }, { text: '我的生活很有意思', reverse: true }, '我认为如果我死了别人会更好', { text: '平常感兴趣的事我仍感兴趣', reverse: true }], citation: 'Zung WWK. 1965.' },
+  sas: { id: 'sas', category: 'anxiety', title: 'SAS 焦虑自评', shortTitle: 'SAS', desc: '最近一周的感受', icon: '😰', color: 'purple', time: 5, options: ['没有或很少', '小部分时间', '相当多时间', '绝大部分时间'], questions: ['我觉得比平时容易紧张', '我无缘无故感到害怕', '我容易心里烦乱或惊恐', '我觉得我可能要发疯', { text: '一切都很好不会发生不幸', reverse: true }, '我手脚发抖打颤', '我因为头痛等而苦恼', '我感觉容易衰弱和疲乏', { text: '我心平气和容易安静坐着', reverse: true }, '我觉得心跳得很快', '我因为一阵阵头晕而苦恼', '我有晕倒发作或觉得要晕倒', { text: '我呼吸感到很容易', reverse: true }, '我的手脚麻木和刺痛', '我因为胃痛消化不良而苦恼', '我常常要小便', { text: '我的手干燥温暖', reverse: true }, '我脸红发热', { text: '我容易入睡并睡得很好', reverse: true }, '我做恶梦'], citation: 'Zung WWK. 1971.' },
+  rosenberg: { id: 'rosenberg', category: 'self', title: 'Rosenberg自尊量表', shortTitle: 'RSES', desc: '对自己的真实感受', icon: '🪞', color: 'teal', time: 3, options: ['非常不同意', '不同意', '同意', '非常同意'], questions: ['我是一个有价值的人', '我有许多好的品质', { text: '我倾向于觉得自己是失败者', reverse: true }, '我能像大多数人一样把事做好', { text: '我值得自豪的地方不多', reverse: true }, '我对自己持肯定态度', '总的来说我对自己满意', { text: '我希望能为自己赢得更多尊重', reverse: true }, { text: '我确实时常感到自己毫无用处', reverse: true }, { text: '我时常认为自己一无是处', reverse: true }], citation: 'Rosenberg M. 1965.' },
+  who5: { id: 'who5', category: 'wellbeing', title: 'WHO-5 幸福感', shortTitle: 'WHO-5', desc: '过去两周的感受', icon: '🌈', color: 'pink', time: 2, options: ['从不', '有时', '少于一半', '超过一半', '大部分', '所有时间'], questions: ['我感到快乐和精神愉快', '我感到平静和放松', '我感到精力充沛和活跃', '我醒来时感到神清气爽', '我的日常生活充满让我感兴趣的事'], citation: 'WHO. WHO-5.' },
+  psqi: { id: 'psqi', category: 'sleep', title: 'PSQI 睡眠质量', shortTitle: 'PSQI', desc: '过去一个月的睡眠情况', icon: '😴', color: 'indigo', time: 4, options: ['没有', '少于每周1次', '每周1-2次', '每周3次以上'], questions: ['入睡困难（30分钟内无法入睡）', '夜间醒来或早醒', '夜间需要起床去厕所', '呼吸不畅', '咳嗽或打鼾', '感觉太冷', '感觉太热', '做噩梦', '感到疼痛不适', '白天感到困倦或精力不足'], citation: 'Buysse DJ. 1989.' }
 };
 
-const CITATIONS = {
-  phq9: [
-    { text: 'Kroenke K, Spitzer RL, Williams JBW. The PHQ-9: Validity of a brief depression severity measure. J Gen Intern Med. 2001.', url: 'https://pubmed.ncbi.nlm.nih.gov/11556941/' }
-  ],
-  gad7: [
-    { text: 'Spitzer RL, Kroenke K, Williams JBW, Löwe B. A brief measure for assessing generalized anxiety disorder: The GAD-7. Arch Intern Med. 2006.', url: 'https://pubmed.ncbi.nlm.nih.gov/16717171/' }
-  ],
-  pss10: [
-    { text: 'Cohen S, Kamarck T, Mermelstein R. A global measure of perceived stress. J Health Soc Behav. 1983.', url: 'https://www.jstor.org/stable/2136404' },
-    { text: 'Perceived Stress Scale (PSS) - Mind Garden', url: 'https://www.mindgarden.com/132-perceived-stress-scale' }
-  ]
+const SCORING = {
+  phq9: (ans) => { const sum = ans.reduce((a,b)=>a+b,0); let grade; if(sum<=4) grade={level:'无/极轻微',color:'emerald',emoji:'😊',advice:'心理状态良好，继续保持。'}; else if(sum<=9) grade={level:'轻度',color:'yellow',emoji:'😐',advice:'有轻微情绪困扰，可尝试运动调整。'}; else if(sum<=14) grade={level:'中度',color:'orange',emoji:'😟',advice:'可能正经历中度抑郁，建议咨询。'}; else if(sum<=19) grade={level:'中重度',color:'red',emoji:'😢',advice:'症状较明显，建议尽快寻求帮助。'}; else grade={level:'重度',color:'red',emoji:'🆘',advice:'症状严重，请务必尽快就医。'}; const safety=ans[8]>=1?'⚠️ 如存在自伤想法，请立即联系应急援助。':null; return {sum,max:27,grade,safety}; },
+  gad7: (ans) => { const sum = ans.reduce((a,b)=>a+b,0); let grade; if(sum<=4) grade={level:'无/极轻微',color:'emerald',emoji:'😌',advice:'状态放松，保持健康生活。'}; else if(sum<=9) grade={level:'轻度',color:'yellow',emoji:'😐',advice:'有些焦虑，可尝试放松练习。'}; else if(sum<=14) grade={level:'中度',color:'orange',emoji:'😟',advice:'可能正经历中度焦虑，建议咨询。'}; else grade={level:'重度',color:'red',emoji:'😰',advice:'焦虑较重，请尽快就医。'}; return {sum,max:21,grade}; },
+  pss10: (ans,qs) => { const scored=ans.map((v,i)=>(typeof qs[i]==='object'&&qs[i].reverse)?(4-v):v); const sum=scored.reduce((a,b)=>a+b,0); let grade; if(sum<=13) grade={level:'低压力',color:'emerald',emoji:'😊',advice:'压力较低，应对良好。'}; else if(sum<=26) grade={level:'中等压力',color:'yellow',emoji:'😐',advice:'处于中等压力，建议优化作息。'}; else grade={level:'高压力',color:'orange',emoji:'😣',advice:'压力较高，建议调整节奏。'}; return {sum,max:40,grade}; },
+  sds: (ans,qs) => { const scored=ans.map((v,i)=>{const s=v+1;return(typeof qs[i]==='object'&&qs[i].reverse)?(5-s):s;}); const raw=scored.reduce((a,b)=>a+b,0); const sum=Math.round(raw*1.25); let grade; if(sum<53) grade={level:'正常',color:'emerald',emoji:'😊',advice:'没有明显抑郁症状。'}; else if(sum<63) grade={level:'轻度抑郁',color:'yellow',emoji:'��',advice:'可能存在轻度抑郁。'}; else if(sum<73) grade={level:'中度抑郁',color:'orange',emoji:'😟',advice:'可能正经历中度抑郁。'}; else grade={level:'重度抑郁',color:'red',emoji:'🆘',advice:'抑郁症状较重，请就医。'}; const safety=ans[18]>=2?'⚠️ 如存在自伤想法，请立即寻求帮助。':null; return {sum,max:100,grade,safety}; },
+  sas: (ans,qs) => { const scored=ans.map((v,i)=>{const s=v+1;return(typeof qs[i]==='object'&&qs[i].reverse)?(5-s):s;}); const raw=scored.reduce((a,b)=>a+b,0); const sum=Math.round(raw*1.25); let grade; if(sum<50) grade={level:'正常',color:'emerald',emoji:'😌',advice:'没有明显焦虑症状。'}; else if(sum<60) grade={level:'轻度焦虑',color:'yellow',emoji:'😐',advice:'可能存在轻度焦虑。'}; else if(sum<70) grade={level:'中度焦虑',color:'orange',emoji:'😟',advice:'可能正经历中度焦虑。'}; else grade={level:'重度焦虑',color:'red',emoji:'😰',advice:'焦虑症状较重，请就医。'}; return {sum,max:100,grade}; },
+  rosenberg: (ans,qs) => { const scored=ans.map((v,i)=>{const s=v+1;return(typeof qs[i]==='object'&&qs[i].reverse)?(5-s):s;}); const sum=scored.reduce((a,b)=>a+b,0); let grade; if(sum>=30) grade={level:'高自尊',color:'emerald',emoji:'��',advice:'拥有健康的自尊水平。'}; else if(sum>=20) grade={level:'中等自尊',color:'yellow',emoji:'😊',advice:'自尊水平正常。'}; else grade={level:'低自尊',color:'orange',emoji:'😔',advice:'对自己评价偏低。'}; return {sum,max:40,grade}; },
+  who5: (ans) => { const sum=ans.reduce((a,b)=>a+b,0); const pct=Math.round((sum/25)*100); let grade; if(pct>=50) grade={level:'良好',color:'emerald',emoji:'🌟',advice:'幸福感良好。'}; else if(pct>=28) grade={level:'一般',color:'yellow',emoji:'😐',advice:'幸福感一般。'}; else grade={level:'偏低',color:'orange',emoji:'😔',advice:'幸福感偏低，请关注状态。'}; return {sum:pct,max:100,grade}; },
+  psqi: (ans) => { const sum=ans.reduce((a,b)=>a+b,0); let grade; if(sum<=5) grade={level:'睡眠质量好',color:'emerald',emoji:'😴',advice:'睡眠良好。'}; else if(sum<=10) grade={level:'睡眠一般',color:'yellow',emoji:'😐',advice:'睡眠有待改善。'}; else if(sum<=15) grade={level:'睡眠较差',color:'orange',emoji:'😣',advice:'睡眠问题较明显。'}; else grade={level:'睡眠障碍',color:'red',emoji:'😫',advice:'建议就医。'}; return {sum,max:30,grade}; }
 };
 
-const state = {
-  view: 'home',
-  current: null,
-  answers: [],
-  step: 0
-};
+const state = { view: 'home', scale: null, answers: [], step: 0, filter: 'all', result: null };
+const $ = id => document.getElementById(id);
+const colorMap = { emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', ring: '#10b981' }, yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', ring: '#eab308' }, orange: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', ring: '#f97316' }, red: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', ring: '#ef4444' } };
 
-const el = (id) => document.getElementById(id);
-
-// --- VIEW MANAGEMENT ---
-
+// ================== 视图管理 ==================
 function switchView(v) {
-  const oldView = state.view;
-  state.view = v;
-  
-  // Simple fade transition logic
-  const views = ['view-home', 'view-test', 'view-result'];
-  views.forEach(id => {
-    const element = el(id);
-    if (id === `view-${v}`) {
-      element.classList.remove('hidden');
-      // Add entry animation
-      element.classList.add('fade-enter');
-      requestAnimationFrame(() => {
-        element.classList.add('fade-enter-active');
-        element.classList.remove('fade-enter');
-      });
-    } else {
-      element.classList.add('hidden');
-      element.classList.remove('fade-enter', 'fade-enter-active');
-    }
+  ['view-home', 'view-test', 'view-result'].forEach(id => {
+    const el = $(id);
+    if (id === `view-${v}`) { el.classList.remove('hidden'); } 
+    else { el.classList.add('hidden'); }
   });
-
+  state.view = v;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- SCORING LOGIC ---
+function goHome() { renderHome(); switchView('home'); }
 
-function reversePSS(v) { return 4 - v; }
+// ================== 首页 ==================
+function renderHome() { renderCategories(); renderScaleCards(); renderStats(); }
 
-function gradePHQ9(sum) {
-  if (sum <= 4) return { level: '最轻度/无', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-  if (sum <= 9) return { level: '轻度', color: 'bg-yellow-50 text-yellow-800 border-yellow-200' };
-  if (sum <= 14) return { level: '中度', color: 'bg-orange-50 text-orange-800 border-orange-200' };
-  if (sum <= 19) return { level: '中重度', color: 'bg-red-50 text-red-700 border-red-200' };
-  return { level: '重度', color: 'bg-red-50 text-red-700 border-red-200' };
+function renderCategories() {
+  const container = $('category-filter');
+  container.innerHTML = Object.entries(CATEGORIES).map(([key, cat]) => `
+    <button onclick="filterCategory('${key}')" class="cat-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap
+      ${state.filter === key ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-white text-gray-600 border border-gray-200 hover:border-emerald-300'}">
+      ${cat.icon} ${cat.name}
+    </button>
+  `).join('');
 }
 
-function advisePHQ9(sum) {
-  if (sum <= 4) return ['您的心理状态良好。建议继续保持规律作息、适量运动与良好社交。']
-  if (sum <= 9) return ['您似乎有一些轻微的情绪困扰。可尝试行为激活、运动与睡眠卫生等自助策略，如持续两周以上或影响功能建议咨询专业人士。']
-  if (sum <= 14) return ['您可能正经历中度的抑郁症状。建议尽快预约专业心理咨询或评估，认知行为疗法（CBT）可能对您有帮助。']
-  if (sum <= 19) return ['您的症状较为明显。建议尽快寻求专业医生的帮助，遵循医嘱进行系统治疗与随访。']
-  return ['您的症状严重，请务必尽快就医。如出现自伤想法，请立即联系应急援助或前往急诊。']
-}
+function filterCategory(cat) { state.filter = cat; renderCategories(); renderScaleCards(); }
 
-function gradeGAD7(sum) {
-  if (sum <= 4) return { level: '最轻度/无', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-  if (sum <= 9) return { level: '轻度', color: 'bg-yellow-50 text-yellow-800 border-yellow-200' };
-  if (sum <= 14) return { level: '中度', color: 'bg-orange-50 text-orange-800 border-orange-200' };
-  return { level: '重度', color: 'bg-red-50 text-red-700 border-red-200' };
-}
-
-function adviseGAD7(sum) {
-  if (sum <= 4) return ['您的状态很放松。建议保持健康生活方式与放松训练。']
-  if (sum <= 9) return ['您似乎有些许焦虑。可尝试呼吸放松、正念练习与时间管理等方法来缓解压力。']
-  if (sum <= 14) return ['您可能正经历中度的焦虑。建议尽快咨询专业人士，系统化开展心理咨询或治疗。']
-  return ['您的焦虑症状较重，可能已影响生活。请尽快就医进行评估与治疗。']
-}
-
-function gradePSS10(sum) {
-  if (sum <= 13) return { level: '低压力', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-  if (sum <= 26) return { level: '中等压力', color: 'bg-yellow-50 text-yellow-800 border-yellow-200' };
-  return { level: '高压力', color: 'bg-orange-50 text-orange-800 border-orange-200' };
-}
-
-function advisePSS10(sum) {
-  if (sum <= 13) return ['您的压力水平较低，应对压力的能力较好。建议继续保持。']
-  if (sum <= 26) return ['您处于中等压力水平。建议优化睡眠、运动与社交支持，并合理安排任务优先级，给自己一些喘息空间。']
-  return ['您的压力水平较高，可能已不堪重负。建议及时调整工作生活节奏，必要时寻求家人、同事与专业人士支持。']
-}
-
-function score(scaleId, answers) {
-  if (scaleId === 'phq9') {
-    const sum = answers.reduce((a, b) => a + b, 0);
-    const grade = gradePHQ9(sum);
-    const advice = advisePHQ9(sum);
-    let safety = null;
-    if (answers[8] >= 1) {
-      safety = '安全提示：您在第9题（关于自伤念头）的回答中选择了非“完全没有”。请务必重视，如存在自伤或伤人想法，请立即联系当地应急援助或前往医院急诊。';
-    }
-    return { sum, max: 27, grade, advice, safety };
-  }
-  if (scaleId === 'gad7') {
-    const sum = answers.reduce((a, b) => a + b, 0);
-    const grade = gradeGAD7(sum);
-    const advice = adviseGAD7(sum);
-    return { sum, max: 21, grade, advice };
-  }
-  if (scaleId === 'pss10') {
-    const scored = answers.map((v, i) => (SCALES.pss10.questions[i].reverse ? reversePSS(v) : v));
-    const sum = scored.reduce((a, b) => a + b, 0);
-    const grade = gradePSS10(sum);
-    const advice = advisePSS10(sum);
-    return { sum, max: 40, grade, advice };
-  }
-  return null;
-}
-
-// --- HOME CONTROLLER ---
-
-function renderHome() {
-  const container = el('cards-container');
-  container.innerHTML = '';
-  Object.values(SCALES).forEach((s) => {
-    const card = document.createElement('div');
-    card.className = 'group bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl hover:border-emerald-200 transition-all duration-300 cursor-pointer flex flex-col relative overflow-hidden';
-    
-    // Decorative background
-    const bg = document.createElement('div');
-    bg.className = 'absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-bl-full -mr-4 -mt-4 z-0 group-hover:scale-110 transition-transform';
-    card.appendChild(bg);
-
-    const content = document.createElement('div');
-    content.className = 'relative z-10 flex-1 flex flex-col';
-    content.innerHTML = `
-      <div class="flex items-start justify-between mb-4">
-        <h3 class="font-bold text-xl text-slate-800 group-hover:text-emerald-700 transition-colors">${s.title}</h3>
+function renderScaleCards() {
+  const container = $('cards-container');
+  const scales = Object.values(SCALES).filter(s => state.filter === 'all' || s.category === state.filter);
+  container.innerHTML = scales.map(s => `
+    <div onclick="startTest('${s.id}')" class="scale-card bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer hover:shadow-xl hover:border-emerald-200 active:scale-[0.98] transition-all">
+      <div class="flex items-start justify-between mb-3">
+        <div class="text-2xl">${s.icon}</div>
+        <span class="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">${s.questions.length}题·${s.time}分钟</span>
       </div>
-      <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-1">${s.desc}</p>
-      <div class="flex items-center justify-between mt-auto">
-        <span class="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">${s.questions.length} 题 · 约 ${Math.ceil(s.questions.length*0.5)} 分钟</span>
-        <button class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
-      </div>
-    `;
-    card.appendChild(content);
-    
-    card.addEventListener('click', () => startTest(s.id));
-    container.appendChild(card);
-  });
-  renderHistory();
-  switchView('home');
+      <h3 class="font-bold text-gray-800 mb-1">${s.title}</h3>
+      <p class="text-sm text-gray-500 line-clamp-2">${s.desc}</p>
+    </div>
+  `).join('');
 }
 
-// --- TEST CONTROLLER (WIZARD) ---
+function renderStats() {
+  const history = getHistory();
+  const total = Object.values(history).flat().length;
+  const scales = Object.keys(history).length;
+  if (total > 0) {
+    $('stats-summary').classList.remove('hidden');
+    $('stat-total').textContent = total;
+    $('stat-scales').textContent = scales;
+    $('stat-streak').textContent = calcStreak(history);
+  } else { $('stats-summary').classList.add('hidden'); }
+}
 
-function startTest(scaleId) {
-  state.current = SCALES[scaleId];
-  state.answers = Array(state.current.questions.length).fill(null);
+function calcStreak(history) {
+  const dates = Object.values(history).flat().map(r => new Date(r.at).toDateString());
+  const unique = [...new Set(dates)].sort((a, b) => new Date(b) - new Date(a));
+  let streak = 0;
+  for (let i = 0; i < unique.length; i++) {
+    const expected = new Date(Date.now() - i * 86400000).toDateString();
+    if (unique[i] === expected) streak++; else break;
+  }
+  return streak || (unique[0] === new Date().toDateString() ? 1 : 0);
+}
+
+// ================== 测试 ==================
+function startTest(id) {
+  state.scale = SCALES[id];
+  state.answers = Array(state.scale.questions.length).fill(null);
   state.step = 0;
-  renderTestUI();
+  $('test-title').textContent = state.scale.shortTitle;
   renderQuestion();
   switchView('test');
 }
 
-function renderTestUI() {
-  // Update static parts of test view if needed
+function renderQuestion() {
+  const q = state.scale.questions[state.step];
+  const text = typeof q === 'object' ? q.text : q;
+  const total = state.scale.questions.length;
+  const pct = Math.round(((state.step + 1) / total) * 100);
+  
+  $('progress-bar').style.width = `${pct}%`;
+  $('progress-text').textContent = `${state.step + 1}/${total}`;
+  $('prev-btn').disabled = state.step === 0;
+  $('prev-btn').style.opacity = state.step === 0 ? '0.3' : '1';
+  $('next-btn').disabled = state.answers[state.step] === null;
+  $('next-btn').textContent = state.step === total - 1 ? '查看结果' : '下一题';
+  
+  const container = $('question-container');
+  container.innerHTML = `
+    <div class="mb-6"><h2 class="text-xl font-bold text-gray-900 leading-relaxed">${text}</h2></div>
+    <div class="space-y-3">
+      ${state.scale.options.map((opt, i) => `
+        <button onclick="selectOption(${i})" class="option-btn w-full text-left px-5 py-4 rounded-xl border-2 transition-all flex items-center gap-3
+          ${state.answers[state.step] === i ? 'border-emerald-500 bg-emerald-50' : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'}">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold
+            ${state.answers[state.step] === i ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'}">${String.fromCharCode(65 + i)}</span>
+          <span class="font-medium text-gray-700">${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  
+  $('question-dots').innerHTML = state.scale.questions.map((_, i) => `
+    <div class="w-2 h-2 rounded-full transition-all ${i === state.step ? 'bg-emerald-500 w-4' : state.answers[i] !== null ? 'bg-emerald-300' : 'bg-gray-200'}"></div>
+  `).join('');
 }
 
-function renderQuestion(direction = 'next') {
-  const qIndex = state.step;
-  const qData = state.current.questions[qIndex];
-  const total = state.current.questions.length;
-  
-  // Update Progress
-  const pct = Math.round(((qIndex) / total) * 100);
-  el('progress-bar').style.width = `${pct}%`;
-  el('progress-text').textContent = `${pct}%`;
-  el('test-step-indicator').textContent = `Question ${qIndex + 1} / ${total}`;
-
-  // Update Buttons
-  el('prev-btn').disabled = qIndex === 0;
-  el('prev-btn').style.opacity = qIndex === 0 ? '0' : '1';
-  el('next-btn').textContent = qIndex === total - 1 ? '查看结果' : '下一题';
-  el('next-btn').classList.toggle('hidden', state.answers[qIndex] === null); // Hide next until answered? Or just disable. We'll use auto-advance mostly.
-
-  // Render Card
-  const container = el('question-card-container');
-  
-  // Create new card
-  const card = document.createElement('div');
-  card.className = 'absolute inset-0 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8';
-  if (direction) {
-    card.classList.add('slide-enter');
-    // Trigger reflow
-    void card.offsetWidth;
-    requestAnimationFrame(() => card.classList.add('slide-enter-active'));
-  }
-
-  // Question Text
-  const title = document.createElement('h3');
-  title.className = 'text-xl md:text-2xl font-bold text-slate-800 mb-8 leading-snug';
-  title.textContent = qData.text;
-  card.appendChild(title);
-
-  // Options
-  const optsContainer = document.createElement('div');
-  optsContainer.className = 'space-y-3';
-  
-  state.current.options.forEach((optText, val) => {
-    const btn = document.createElement('button');
-    const isSelected = state.answers[qIndex] === val;
-    
-    btn.className = `w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 flex items-center group ${
-      isSelected 
-        ? 'border-emerald-500 bg-emerald-50/50 text-emerald-900 shadow-inner' 
-        : 'border-slate-100 hover:border-emerald-200 hover:bg-slate-50 text-slate-600'
-    }`;
-    
-    // Keyboard shortcut index
-    const keyIndex = document.createElement('span');
-    keyIndex.className = `flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium mr-4 border transition-colors ${
-      isSelected ? 'border-emerald-200 bg-emerald-200 text-emerald-700' : 'border-slate-200 text-slate-400 group-hover:border-emerald-200'
-    }`;
-    keyIndex.textContent = String.fromCharCode(65 + val); // A, B, C...
-
-    const textSpan = document.createElement('span');
-    textSpan.className = 'font-medium text-base';
-    textSpan.textContent = optText;
-
-    btn.appendChild(keyIndex);
-    btn.appendChild(textSpan);
-
-    btn.onclick = () => handleAnswer(val);
-    optsContainer.appendChild(btn);
-  });
-  card.appendChild(optsContainer);
-
-  // Replace old card
-  container.innerHTML = '';
-  container.appendChild(card);
-}
-
-function handleAnswer(val) {
+function selectOption(val) {
   state.answers[state.step] = val;
-  
-  // Visual feedback - re-render current question to show selection state briefly
-  renderQuestion(null);
-
+  renderQuestion();
   setTimeout(() => {
-    if (state.step < state.current.questions.length - 1) {
-      state.step++;
-      renderQuestion('next');
-    } else {
-      finishTest();
-    }
-  }, 250); // Small delay for user to see feedback
+    if (state.step < state.scale.questions.length - 1) { state.step++; renderQuestion(); }
+    else { finishTest(); }
+  }, 250);
 }
 
-function prevQuestion() {
-  if (state.step > 0) {
-    state.step--;
-    renderQuestion('prev');
-  }
+function prevQuestion() { if (state.step > 0) { state.step--; renderQuestion(); } }
+function nextQuestion() {
+  if (state.answers[state.step] === null) return;
+  if (state.step < state.scale.questions.length - 1) { state.step++; renderQuestion(); }
+  else finishTest();
 }
+
+function exitTest() { if (confirm('确定要退出吗？当前进度将丢失。')) goHome(); }
+function retakeTest() { startTest(state.scale.id); }
 
 function finishTest() {
-  // Calculate full progress for a moment
-  el('progress-bar').style.width = '100%';
-  el('progress-text').textContent = '100%';
-  
-  setTimeout(() => {
-    const res = score(state.current.id, state.answers);
-    renderResult(res);
-    switchView('result');
-  }, 400);
+  const result = SCORING[state.scale.id](state.answers, state.scale.questions);
+  state.result = result;
+  renderResult(result);
+  saveHistory(result);
+  switchView('result');
 }
 
-// --- RESULT CONTROLLER ---
-
+// ================== 结果 ==================
 function renderResult(res) {
-  el('result-title').textContent = state.current.title;
-  
-  // Animate Score
-  const scoreEl = el('result-score');
-  const startVal = 0;
-  const endVal = res.sum;
-  const duration = 1000;
-  const startTime = performance.now();
-
-  function updateScore(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3); // cubic ease out
-    
-    const currentScore = Math.floor(startVal + (endVal - startVal) * ease);
-    scoreEl.textContent = currentScore;
-
-    if (progress < 1) {
-      requestAnimationFrame(updateScore);
-    }
-  }
-  requestAnimationFrame(updateScore);
-
-  // Update Gauge
+  const c = colorMap[res.grade.color];
   const pct = Math.round((res.sum / res.max) * 100);
-  el('score-circle').style.setProperty('--score-pct', pct);
-
-  // Severity Info
-  // el('result-severity').textContent = res.grade.level;
-  // el('result-severity').className = `text-3xl md:text-4xl font-bold ${res.grade.color.replace('bg-', 'text-').split(' ')[1]}`; // Hacky color extraction or just reset text color
-  // Let's just use text-slate-800 for main text and colored tag
-  el('result-severity').textContent = res.grade.level;
-  el('result-severity').className = 'text-3xl md:text-4xl font-bold text-slate-900';
   
-  const tag = el('result-tag');
-  tag.textContent = res.grade.level;
-  // Extract color classes
-  // grade.color is like "bg-emerald-50 text-emerald-700 border-emerald-200"
-  tag.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${res.grade.color}`;
+  $('score-ring').style.setProperty('--pct', pct);
+  $('score-ring').setAttribute('stroke', c.ring);
+  $('result-emoji').textContent = res.grade.emoji;
+  
+  let score = 0;
+  const scoreEl = $('result-score');
+  const duration = 800;
+  const start = performance.now();
+  function animateScore(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    score = Math.floor(res.sum * progress);
+    scoreEl.textContent = `${score}/${res.max}`;
+    if (progress < 1) requestAnimationFrame(animateScore);
+  }
+  requestAnimationFrame(animateScore);
+  
+  $('result-title').textContent = state.scale.title;
+  $('result-level-badge').className = `inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold ${c.bg} ${c.text} ${c.border} border`;
+  $('result-level-badge').textContent = res.grade.level;
+  $('result-advice').textContent = res.grade.advice;
+  
+  if (res.safety) { $('safety-alert').classList.remove('hidden'); $('safety-text').textContent = res.safety; }
+  else { $('safety-alert').classList.add('hidden'); }
+  
+  // 详情
+  $('result-detail').innerHTML = state.scale.questions.map((q, i) => {
+    const text = typeof q === 'object' ? q.text : q;
+    return `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm">
+      <span class="text-gray-600 truncate flex-1 mr-4">${i + 1}. ${text}</span>
+      <span class="font-medium text-gray-800 flex-shrink-0">${state.scale.options[state.answers[i]]}</span>
+    </div>`;
+  }).join('');
+  
+  $('result-citations').innerHTML = `<li><a href="#" class="text-gray-400 hover:text-emerald-600">${state.scale.citation}</a></li>`;
+  $('detail-section').classList.add('hidden');
+  $('detail-chevron').style.transform = 'rotate(0deg)';
+}
 
-  // Advice
-  const advice = el('result-advice');
-  advice.innerHTML = res.advice.map((p) => `<p class="mb-3">${p}</p>`).join('');
-
-  // Citations
-  const citations = el('result-citations');
-  citations.innerHTML = '';
-  (CITATIONS[state.current.id] || []).forEach((c) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<a class="text-slate-400 hover:text-emerald-600 hover:underline transition-colors" href="${c.url}" target="_blank" rel="noopener">${c.text}</a>`;
-    citations.appendChild(li);
-  });
-
-  // Details
-  const detail = el('result-detail');
-  detail.innerHTML = '';
-  state.current.questions.forEach((q, i) => {
-    const v = state.answers[i];
-    const label = state.current.options[v]; // e.g. "几乎每天(3)"
-    const item = document.createElement('div');
-    item.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm';
-    item.innerHTML = `<span class="text-slate-600 truncate flex-1 mr-4">${i + 1}. ${q.text}</span><span class="font-medium text-slate-800 flex-shrink-0">${label.split('(')[0]}</span>`;
-    detail.appendChild(item);
-  });
-
-  // Safety
-  const safety = el('safety-note');
-  if (res.safety) {
-    el('safety-text').textContent = res.safety;
-    safety.classList.remove('hidden');
+function toggleDetail() {
+  const section = $('detail-section');
+  const chevron = $('detail-chevron');
+  if (section.classList.contains('hidden')) {
+    section.classList.remove('hidden');
+    chevron.style.transform = 'rotate(180deg)';
   } else {
-    safety.classList.add('hidden');
+    section.classList.add('hidden');
+    chevron.style.transform = 'rotate(0deg)';
   }
-  
-  // Reset toggle
-  el('detailSection').classList.add('hidden');
-  el('detailChevron').style.transform = 'rotate(0deg)';
+}
 
-  // Save History
+// ================== 历史记录 ==================
+function getHistory() {
+  const raw = localStorage.getItem('mindself_history');
+  return raw ? JSON.parse(raw) : {};
+}
+
+function saveHistory(result) {
+  const history = getHistory();
   const record = {
-    id: state.current.id,
-    title: state.current.title,
-    sum: res.sum,
-    max: res.max,
-    level: res.grade.level,
-    at: Date.now()
+    id: state.scale.id, title: state.scale.title, shortTitle: state.scale.shortTitle,
+    sum: result.sum, max: result.max, level: result.grade.level, emoji: result.grade.emoji,
+    color: result.grade.color, at: Date.now()
   };
-  saveHistory(record);
+  if (!history[state.scale.id]) history[state.scale.id] = [];
+  history[state.scale.id].unshift(record);
+  history[state.scale.id] = history[state.scale.id].slice(0, 20);
+  localStorage.setItem('mindself_history', JSON.stringify(history));
 }
 
-// --- HISTORY MANAGER ---
-
-function saveHistory(rec) {
-  const key = 'mindself_studio_history';
-  const raw = localStorage.getItem(key);
-  const data = raw ? JSON.parse(raw) : {};
-  if (!data[rec.id]) data[rec.id] = [];
-  data[rec.id].unshift(rec);
-  data[rec.id] = data[rec.id].slice(0, 10);
-  localStorage.setItem(key, JSON.stringify(data));
+function showHistory() {
+  const modal = $('history-modal');
+  const sheet = modal.querySelector('.bottom-sheet');
+  modal.classList.remove('hidden');
+  setTimeout(() => sheet.classList.add('open'), 10);
+  renderHistoryList();
 }
 
-function renderHistory() {
-  const key = 'mindself_studio_history';
-  const raw = localStorage.getItem(key);
-  const data = raw ? JSON.parse(raw) : {};
-  const container = el('history-container');
-  container.innerHTML = '';
-  
-  let hasAny = false;
-  // Flatten history for display sorted by time
+function hideHistory() {
+  const modal = $('history-modal');
+  const sheet = modal.querySelector('.bottom-sheet');
+  sheet.classList.remove('open');
+  setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+function renderHistoryList() {
+  const history = getHistory();
+  const list = $('history-list');
   let allRecs = [];
-  Object.values(data).forEach(list => allRecs = allRecs.concat(list));
+  Object.values(history).forEach(arr => allRecs = allRecs.concat(arr));
   allRecs.sort((a, b) => b.at - a.at);
-
-  if (allRecs.length > 0) {
-    hasAny = true;
-    allRecs.slice(0, 5).forEach(rec => {
-      const card = document.createElement('div');
-      card.className = 'flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-md transition-all';
-      
-      const d = new Date(rec.at);
-      const timeStr = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      
-      card.innerHTML = `
-        <div>
-          <div class="font-bold text-slate-800">${rec.title}</div>
-          <div class="text-xs text-slate-400 mt-1">${timeStr}</div>
-        </div>
-        <div class="text-right">
-          <div class="font-bold text-emerald-600">${rec.sum} <span class="text-xs text-slate-400 font-normal">/ ${rec.max}</span></div>
-          <div class="text-xs text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 inline-block mt-1">${rec.level}</div>
-        </div>
-      `;
-      // Allow clicking history to maybe retake? Or just view? For now just display.
-      container.appendChild(card);
-    });
+  
+  if (allRecs.length === 0) {
+    list.innerHTML = '<div class="text-center text-gray-400 py-8">暂无历史记录</div>';
+    return;
   }
-
-  el('history-block').classList.toggle('hidden', !hasAny);
+  
+  list.innerHTML = allRecs.slice(0, 20).map(rec => {
+    const d = new Date(rec.at);
+    const time = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const c = colorMap[rec.color];
+    return `<div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">${rec.emoji}</span>
+        <div>
+          <div class="font-bold text-gray-800">${rec.shortTitle || rec.title}</div>
+          <div class="text-xs text-gray-400">${time}</div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="font-bold text-gray-900">${rec.sum}<span class="text-xs text-gray-400 font-normal">/${rec.max}</span></div>
+        <span class="text-xs px-2 py-0.5 rounded-full ${c.bg} ${c.text}">${rec.level}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function clearHistory() {
-  if(confirm('确定要清空所有历史记录吗？')) {
-    localStorage.removeItem('mindself_studio_history');
-    renderHistory();
+  if (confirm('确定要清空所有历史记录吗？')) {
+    localStorage.removeItem('mindself_history');
+    renderHistoryList();
+    renderStats();
   }
 }
 
-// --- INIT ---
+// ================== 分享功能 ==================
+let currentCardStyle = 'gradient';
+const cardStyles = {
+  gradient: 'background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);',
+  calm: 'background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);',
+  warm: 'background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);',
+  cool: 'background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);',
+  nature: 'background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);'
+};
 
-function initPrivacy() {
-  const modal = el('privacyModal');
-  const open = () => {
-    modal.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      modal.classList.remove('opacity-0');
-      modal.children[0].classList.remove('scale-95');
-      modal.children[0].classList.add('scale-100');
-    });
-  };
-  const close = () => {
-    modal.classList.add('opacity-0');
-    modal.children[0].classList.remove('scale-100');
-    modal.children[0].classList.add('scale-95');
-    setTimeout(() => modal.classList.add('hidden'), 300);
-  };
-
-  el('privacyBtn').addEventListener('click', open);
-  el('privacyClose').addEventListener('click', close);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) close();
-  });
+function showShareModal() {
+  const modal = $('share-modal');
+  modal.classList.remove('hidden');
+  renderShareCard();
+  generateQRCode();
 }
 
+function hideShareModal() { $('share-modal').classList.add('hidden'); }
+
+function setCardStyle(style) {
+  currentCardStyle = style;
+  document.querySelectorAll('.card-style-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-emerald-500'));
+  event.target.classList.add('ring-2', 'ring-emerald-500');
+  renderShareCard();
+}
+
+function renderShareCard() {
+  const card = $('share-card-preview');
+  const res = state.result;
+  const isDark = currentCardStyle === 'gradient';
+  card.style = cardStyles[currentCardStyle];
+  card.className = `rounded-2xl p-6 shadow-lg ${isDark ? 'text-white' : 'text-gray-800'}`;
+  
+  $('share-emoji').textContent = res.grade.emoji;
+  $('share-title').textContent = state.scale.title;
+  $('share-level').textContent = res.grade.level;
+  $('share-score').textContent = `${res.sum}/${res.max}`;
+  $('share-date').textContent = new Date().toLocaleDateString('zh-CN');
+}
+
+function generateQRCode() {
+  const qrContainer = $('qr-code');
+  qrContainer.innerHTML = '';
+  const url = window.location.href.split('?')[0];
+  if (typeof QRCode !== 'undefined') {
+    QRCode.toCanvas(qrContainer, url, { width: 64, margin: 0 }, (err) => {
+      if (err) console.error(err);
+    });
+  }
+}
+
+async function downloadCard() {
+  const card = $('share-card-preview');
+  try {
+    const canvas = await html2canvas(card, { scale: 2, backgroundColor: null });
+    const link = document.createElement('a');
+    link.download = `mindself-${state.scale.id}-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (e) { alert('生成图片失败，请截图保存'); }
+}
+
+async function shareCard() {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'MindSelf Studio 测评结果', text: `我在 ${state.scale.title} 测评中得到了 ${state.result.grade.level} 的结果`, url: window.location.href });
+    } catch (e) { console.log('Share cancelled'); }
+  } else { downloadCard(); }
+}
+
+// ================== 隐私弹窗 ==================
+function showPrivacy() {
+  const modal = $('privacy-modal');
+  modal.classList.remove('hidden');
+  setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
+}
+
+function hidePrivacy() {
+  const modal = $('privacy-modal');
+  modal.classList.add('opacity-0');
+  modal.querySelector('.modal-content').classList.add('scale-95');
+  setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+// ================== 初始化 ==================
 function init() {
   renderHome();
-  initPrivacy();
-
-  el('backHomeFromTest').addEventListener('click', () => switchView('home'));
-  el('backHomeFromResult').addEventListener('click', () => switchView('home'));
-  el('retakeBtn').addEventListener('click', () => startTest(state.current.id));
-  el('printBtn').addEventListener('click', () => window.print());
-  
-  el('prev-btn').addEventListener('click', prevQuestion);
-  el('next-btn').addEventListener('click', () => {
-    // Manual next if needed
-  });
-  
-  el('toggleDetailsBtn').addEventListener('click', () => {
-    const section = el('detailSection');
-    const icon = el('detailChevron');
-    const isHidden = section.classList.contains('hidden');
-    
-    if (isHidden) {
-      section.classList.remove('hidden');
-      icon.style.transform = 'rotate(180deg)';
-    } else {
-      section.classList.add('hidden');
-      icon.style.transform = 'rotate(0deg)';
-    }
-  });
-
-  el('clearHistoryBtn').addEventListener('click', clearHistory);
+  // 注册 Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
