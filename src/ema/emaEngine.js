@@ -918,4 +918,4 @@ const EMA_FORM_CONFIG = {
 };
 
 // 导出模块
-export { EMAEngine, EMA_FORM_CONFIG };
+module.exports = { EMAEngine, EMA_FORM_CONFIG };

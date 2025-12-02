@@ -30,16 +30,32 @@ class VisualizationEngine {
   
   // 从CDN加载Chart.js
   loadChartJSFromCDN() {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
-    script.onload = () => {
-      console.log('Chart.js loaded successfully');
-      this.chartDefaults = this.initializeChartDefaults();
-    };
-    script.onerror = () => {
-      console.error('Failed to load Chart.js');
-    };
-    document.head.appendChild(script);
+    if (typeof document === 'undefined' || !document.createElement) {
+      console.warn('Document not available, skipping Chart.js CDN load');
+      return;
+    }
+    
+    try {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+      script.async = true;
+      script.onload = () => {
+        console.log('Chart.js loaded successfully');
+        this.chartDefaults = this.initializeChartDefaults();
+      };
+      script.onerror = () => {
+        console.error('Failed to load Chart.js');
+      };
+      if (document.head) {
+        document.head.appendChild(script);
+      } else if (document.documentElement) {
+        document.documentElement.appendChild(script);
+      } else {
+        console.warn('No document head or root element available');
+      }
+    } catch (error) {
+      console.warn('Failed to create script element:', error.message);
+    }
   }
   
   // 初始化颜色方案
@@ -690,4 +706,4 @@ class VisualizationEngine {
 }
 
 // 导出模块
-export { VisualizationEngine };
+module.exports = { VisualizationEngine };

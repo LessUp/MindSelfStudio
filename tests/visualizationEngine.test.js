@@ -1,6 +1,5 @@
 // 数据可视化引擎单元测试
-import { VisualizationEngine } from '../src/visualization/visualizationEngine.js';
-import { jest } from '@jest/globals';
+const { VisualizationEngine } = require('../src/visualization/visualizationEngine.js');
 
 // 模拟 Chart.js
 class MockChart {
@@ -50,8 +49,19 @@ describe('VisualizationEngine 测试', () => {
       rotate: jest.fn()
     };
     
-    // 模拟 getContext 方法
-    mockCanvas.getContext = jest.fn(() => mockContext);
+    // 模拟 getContext 方法 - 完全模拟canvas行为
+    mockCanvas.getContext = jest.fn((type) => {
+      if (type === '2d') {
+        return mockContext;
+      }
+      return null;
+    });
+    
+    // 模拟canvas的完整属性
+    mockCanvas.width = 300;
+    mockCanvas.height = 150;
+    mockCanvas.style = {};
+    
     document.body.appendChild(mockCanvas);
     
     engine = new VisualizationEngine({
@@ -271,6 +281,10 @@ describe('VisualizationEngine 测试', () => {
       // 创建第二个canvas元素
       const mockCanvas2 = document.createElement('canvas');
       mockCanvas2.id = 'test-chart2';
+      mockCanvas2.width = 300;
+      mockCanvas2.height = 150;
+      mockCanvas2.style = {};
+      mockCanvas2.getContext = jest.fn(() => mockContext);
       document.body.appendChild(mockCanvas2);
       
       // 创建多个图表
@@ -420,6 +434,326 @@ describe('VisualizationEngine 测试', () => {
       expect(chartData.datasets.length).toBe(1);
       expect(chartData.datasets[0].label).toBe('得分');
       expect(chartData.datasets[0].data).toEqual(data.scores);
+    });
+  });
+  
+  describe('补充测试 - 提高覆盖率', () => {
+    let engine;
+    let mockCanvas;
+    let mockContext;
+    
+    beforeEach(() => {
+      MockChart.clearInstances();
+      
+      // 创建模拟canvas元素
+      mockCanvas = document.createElement('canvas');
+      mockCanvas.id = 'test-chart';
+      mockContext = {
+        canvas: mockCanvas,
+        clearRect: jest.fn(),
+        fillRect: jest.fn(),
+        fillText: jest.fn(),
+        save: jest.fn(),
+        restore: jest.fn(),
+        translate: jest.fn(),
+        rotate: jest.fn()
+      };
+      
+      mockCanvas.getContext = jest.fn(() => mockContext);
+      mockCanvas.width = 300;
+      mockCanvas.height = 150;
+      mockCanvas.style = {};
+      mockCanvas.toDataURL = jest.fn((format) => `data:${format};base64,test`);
+      
+      document.body.appendChild(mockCanvas);
+    });
+    
+    afterEach(() => {
+      if (mockCanvas && mockCanvas.parentNode) {
+        document.body.removeChild(mockCanvas);
+      }
+    });
+    
+    describe('Chart.js 加载和错误处理', () => {
+      test('应该处理 Chart.js 未加载的情况', () => {
+        // 临时删除 Chart 全局变量
+        const originalChart = global.Chart;
+        delete global.Chart;
+        
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+        
+        engine = new VisualizationEngine();
+        
+        expect(consoleSpy).toHaveBeenCalledWith('Chart.js not loaded. Loading from CDN...');
+        expect(engine.chartDefaults).toBeDefined();
+        
+        // 恢复 Chart 全局变量
+        global.Chart = originalChart;
+        consoleSpy.mockRestore();
+      });
+      
+      test('应该从 CDN 加载 Chart.js', () => {
+        const originalChart = global.Chart;
+        delete global.Chart;
+        
+        // 模拟 document.createElement 和 appendChild
+        const mockScript = {
+          src: '',
+          onload: null,
+          onerror: null
+        };
+        
+        const createElementSpy = jest.spyOn(document, 'createElement').mockReturnValue(mockScript);
+        const appendChildSpy = jest.spyOn(document.head, 'appendChild').mockImplementation();
+        const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+        
+        engine = new VisualizationEngine();
+        
+        // 验证 CDN 加载调用
+        expect(createElementSpy).toHaveBeenCalledWith('script');
+        expect(mockScript.src).toBe('https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js');
+        expect(appendChildSpy).toHaveBeenCalledWith(mockScript);
+        
+        // 测试 onload 回调
+        mockScript.onload();
+        expect(consoleLogSpy).toHaveBeenCalledWith('Chart.js loaded successfully');
+        
+        // 测试 onerror 回调
+        mockScript.onerror();
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load Chart.js');
+        
+        // 恢复
+        global.Chart = originalChart;
+        createElementSpy.mockRestore();
+        appendChildSpy.mockRestore();
+        consoleLogSpy.mockRestore();
+        consoleErrorSpy.mockRestore();
+      });
+    });
+    
+    describe('图表更新和导出功能', () => {
+      beforeEach(() => {
+        engine = new VisualizationEngine();
+      });
+      
+      test('应该导出不同格式的图表', () => {
+        const chart = engine.createMentalHealthTrendChart('test-chart', {
+          labels: ['1月', '2月'],
+          depression: [5, 6],
+          anxiety: [3, 4],
+          stress: [7, 8],
+          wellbeing: [60, 55]
+        });
+        
+        // 测试 PNG 格式
+        const pngData = engine.exportChart('test-chart', 'png', 'test-chart');
+        expect(pngData).toContain('data:image/png;base64');
+        
+        // 测试 JPEG 格式
+        const jpgData = engine.exportChart('test-chart', 'jpg', 'test-chart');
+        expect(jpgData).toContain('data:image/jpeg;base64');
+        
+        // 测试 PDF 格式（需要额外库）
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const pdfData = engine.exportChart('test-chart', 'pdf', 'test-chart');
+        expect(consoleSpy).toHaveBeenCalledWith('PDF export requires additional library');
+        expect(pdfData).toContain('data:image/png;base64'); // PDF 会回退到 PNG
+        consoleSpy.mockRestore();
+      });
+    });
+    
+    describe('热力图高级功能', () => {
+      beforeEach(() => {
+        engine = new VisualizationEngine();
+      });
+      
+      test('应该创建带有数值标签的热力图', () => {
+        const heatmapData = {
+          days: ['周一', '周二'],
+          hours: ['9:00', '12:00'],
+          values: [[5, 6], [4, 7]]
+        };
+        
+        const chart = engine.createEmotionHeatmapChart('test-chart', heatmapData, {
+          showValues: true,
+          showLabels: true
+        });
+        
+        expect(chart).toBeDefined();
+        expect(mockContext.fillRect).toHaveBeenCalled();
+        expect(mockContext.fillText).toHaveBeenCalled();
+      });
+      
+      test('应该处理热力图缺少数据的情况', () => {
+        const chart = engine.createEmotionHeatmapChart('test-chart', {}, {});
+        
+        expect(chart).toBeDefined();
+        expect(chart.days).toEqual(['周一', '周二', '周三', '周四', '周五', '周六', '周日']);
+        expect(chart.hours).toBeDefined();
+        expect(chart.values).toBeDefined();
+      });
+      
+      test('应该处理热力图颜色边界值', () => {
+        // 测试边界值
+        expect(engine.getHeatmapColor(-1)).toBe('#3b82f6'); // 负值 - 最低颜色
+        expect(engine.getHeatmapColor(20)).toBe('#b45309'); // 超范围 - 最高颜色
+      });
+    });
+    
+    describe('健康仪表板功能', () => {
+      beforeEach(() => {
+        engine = new VisualizationEngine();
+      });
+      
+      test('应该处理缺少概览数据的情况', () => {
+        const container = document.createElement('div');
+        container.id = 'dashboard-container';
+        document.body.appendChild(container);
+        
+        const dashboardData = {
+          overview: {}, // 空数据
+          trendData: {},
+          radarData: {},
+          comparisonData: {},
+          recommendations: []
+        };
+        
+        const dashboard = engine.createHealthDashboard('dashboard-container', dashboardData);
+        
+        expect(dashboard).toBeDefined();
+        expect(container.innerHTML).toContain('整体健康');
+        expect(container.innerHTML).toContain('75分'); // 默认值
+        expect(container.innerHTML).toContain('暂无个性化建议');
+        
+        document.body.removeChild(container);
+      });
+      
+      test('应该生成带有不同优先级的建议', () => {
+        const recommendations = [
+          { priority: 'high', suggestion: '立即就医', action: '联系心理医生' },
+          { priority: 'medium', suggestion: '保持运动', action: '每天散步30分钟' },
+          { priority: 'low', suggestion: '多喝水', action: '每天至少8杯水' }
+        ];
+        
+        const container = document.createElement('div');
+        container.id = 'dashboard-container';
+        document.body.appendChild(container);
+        
+        const dashboardData = {
+          overview: {},
+          trendData: {},
+          radarData: {},
+          comparisonData: {},
+          recommendations: recommendations
+        };
+        
+        const dashboard = engine.createHealthDashboard('dashboard-container', dashboardData);
+        
+        expect(container.innerHTML).toContain('立即就医');
+        expect(container.innerHTML).toContain('保持运动');
+        expect(container.innerHTML).toContain('多喝水');
+        expect(container.innerHTML).toContain('高');
+        expect(container.innerHTML).toContain('中');
+        expect(container.innerHTML).toContain('低');
+        
+        document.body.removeChild(container);
+      });
+    });
+    
+    describe('配置合并边界情况', () => {
+      beforeEach(() => {
+        engine = new VisualizationEngine();
+      });
+      
+      test('应该处理嵌套对象合并', () => {
+        const defaultOptions = {
+          plugins: {
+            title: {
+              display: true,
+              text: '默认标题'
+            },
+            legend: {
+              position: 'top'
+            }
+          },
+          scales: {
+            x: {
+              display: true
+            }
+          }
+        };
+        
+        const customOptions = {
+          plugins: {
+            title: {
+              text: '自定义标题'
+            }
+          },
+          scales: {
+            y: {
+              display: false
+            }
+          }
+        };
+        
+        const merged = engine.mergeOptions(defaultOptions, customOptions);
+        
+        expect(merged.plugins.title.display).toBe(true); // 保留默认值
+        expect(merged.plugins.title.text).toBe('自定义标题'); // 被覆盖
+        expect(merged.plugins.legend.position).toBe('top'); // 保持不变
+        expect(merged.scales.x.display).toBe(true); // 保持不变
+        expect(merged.scales.y.display).toBe(false); // 新增
+      });
+    });
+    
+    describe('边界情况和错误处理', () => {
+      beforeEach(() => {
+        engine = new VisualizationEngine();
+      });
+      
+      test('应该处理不完整的趋势图数据', () => {
+        const incompleteData = {
+          labels: ['1月', '2月'],
+          // 缺少某些数据数组
+          depression: [5, 6],
+          anxiety: [3, 4]
+          // stress 和 wellbeing 缺失
+        };
+        
+        const chart = engine.createMentalHealthTrendChart('test-chart', incompleteData);
+        
+        expect(chart).toBeDefined();
+        expect(MockChart.instances[0].config.data.datasets.length).toBe(4);
+        expect(MockChart.instances[0].config.data.datasets[2].data).toEqual([]); // stress 数据为空
+        expect(MockChart.instances[0].config.data.datasets[3].data).toEqual([]); // wellbeing 数据为空
+      });
+      
+      test('应该处理不完整的雷达图数据', () => {
+        const incompleteData = {
+          dimensions: ['抑郁', '焦虑'],
+          current: [60, 45]
+          // target 数据缺失
+        };
+        
+        const chart = engine.createWellbeingRadarChart('test-chart', incompleteData);
+        
+        expect(chart).toBeDefined();
+        expect(MockChart.instances[0].config.data.datasets.length).toBe(2);
+        expect(MockChart.instances[0].config.data.datasets[1].data).toEqual([80, 80, 80, 90, 85, 85]); // 使用默认目标值
+      });
+      
+      test('应该处理不完整的柱状图数据', () => {
+        const incompleteData = {
+          labels: ['PHQ-9', 'GAD-7']
+          // scores 数据缺失
+        };
+        
+        const chart = engine.createScaleComparisonChart('test-chart', incompleteData);
+        
+        expect(chart).toBeDefined();
+        expect(MockChart.instances[0].config.data.datasets[0].data).toEqual([45, 38, 62, 55, 78]); // 使用默认分数
+      });
     });
   });
 });

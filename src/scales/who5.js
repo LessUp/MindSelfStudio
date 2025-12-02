@@ -380,6 +380,13 @@ class WHO5ScoringEngine {
       throw new Error('WHO-5 requires exactly 5 answers');
     }
     
+    // 验证答案值范围
+    answers.forEach(answer => {
+      if (answer < 0 || answer > 5) {
+        throw new Error('Answer values must be between 0 and 5');
+      }
+    });
+    
     // 1. 计算分数
     const scores = this.calculateRawScore(answers);
     
@@ -424,4 +431,4 @@ const WHO5_CITATIONS = [
 ];
 
 // 导出模块
-export { WHO5_SCALE, WHO5ScoringEngine, WHO5_CITATIONS };
+module.exports = { WHO5_SCALE, WHO5ScoringEngine, WHO5_CITATIONS };

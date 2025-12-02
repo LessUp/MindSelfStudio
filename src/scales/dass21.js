@@ -377,6 +377,13 @@ class DASS21ScoringEngine {
       throw new Error('DASS-21 requires exactly 21 answers');
     }
     
+    // 验证答案值范围
+    answers.forEach(answer => {
+      if (answer < 0 || answer > 3) {
+        throw new Error('Answer values must be between 0 and 3');
+      }
+    });
+    
     // 1. 计算原始分数
     const rawScores = this.calculateRawScore(answers);
     
@@ -424,4 +431,4 @@ const DASS_21_CITATIONS = [
 ];
 
 // 导出模块
-export { DASS_21_SCALE, DASS21ScoringEngine, DASS_21_CITATIONS };
+module.exports = { DASS_21_SCALE, DASS21ScoringEngine, DASS_21_CITATIONS };

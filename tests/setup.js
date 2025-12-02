@@ -1,7 +1,7 @@
 // 测试环境设置
 // 模拟 DOM API 和全局对象
 
-import { jest } from '@jest/globals';
+// Access jest globally since we're in a Jest environment
 
 // 模拟 localStorage
 const localStorageMock = {
@@ -80,6 +80,14 @@ global.Notification = class MockNotification {
     return Promise.resolve('granted');
   }
   
+  static get permission() {
+    return 'granted';
+  }
+  
+  static set permission(value) {
+    // Allow setting permission for testing
+  }
+  
   static get instances() {
     if (!this._instances) {
       this._instances = [];
@@ -95,6 +103,10 @@ global.Notification = class MockNotification {
     this.closed = true;
   }
 };
+
+// Also add to window for the 'Notification in window' check
+global.window = global.window || {};
+global.window.Notification = global.Notification;
 
 // 模拟 Web Storage API
 class MockStorageEvent extends Event {
@@ -307,6 +319,20 @@ beforeEach(() => {
   geolocationMock.watchPosition.mockClear();
   geolocationMock.clearWatch.mockClear();
 });
+
+// 模拟 HTMLCanvasElement.prototype.toDataURL
+if (typeof HTMLCanvasElement !== 'undefined') {
+  const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+  HTMLCanvasElement.prototype.toDataURL = function(type, encoderOptions) {
+    // Return a mock data URL for testing
+    if (type === 'image/png') {
+      return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+    } else if (type === 'image/jpeg' || type === 'image/jpg') {
+      return 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=';
+    }
+    return originalToDataURL.call(this, type, encoderOptions);
+  };
+}
 
 // 全局测试工具
 global.testUtils = {

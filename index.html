@@ -2,293 +2,267 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#10b981" />
   <title>MindSelf Studio 心理量表</title>
-  <meta name="description" content="PHQ-9、GAD-7、PSS-10 在线心理学量表测试，自动评分与建议，仅作科普与自我筛查参考。" />
+  <meta name="description" content="专业心理学量表在线测试，PHQ-9、GAD-7、SDS、SAS等，自动评分与建议，隐私安全。" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%2310b981'/%3E%3Cpath d='M28 52c8 10 16 15 22 15 10 0 22-13 22-29' fill='none' stroke='white' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    @media print {
-      .no-print { display: none !important; }
-      .print-bg { background: white !important; }
-    }
+    * { -webkit-tap-highlight-color: transparent; }
+    body { overscroll-behavior: none; }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+    @keyframes dash { from { stroke-dasharray: 0, 100; } to { stroke-dasharray: var(--pct), 100; } }
+    .meter-ring { animation: dash 1.2s ease-out forwards; }
+    .scale-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .scale-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    .scale-card:active { transform: scale(0.98); }
+    .bottom-sheet { transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .bottom-sheet.open { transform: translateY(0); }
+    .modal-backdrop { backdrop-filter: blur(8px); }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-200">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="h-8 w-8 rounded-full bg-emerald-500"></div>
-        <span class="font-semibold text-lg">MindSelf Studio 心理量表</span>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen flex flex-col">
+  
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="goHome()">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-200/50 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.258 50.558 50.558 0 00-2.658.813m-15.482 0A50.55 50.55 0 0112 13.489a50.55 50.55 0 0112-4.02" />
+          </svg>
+        </div>
+        <span class="font-bold text-lg tracking-tight">MindSelf</span>
       </div>
-      <div class="flex items-center gap-3 no-print">
-        <button id="privacyBtn" class="text-sm text-gray-600 hover:text-gray-900">隐私与免责声明</button>
+      <div class="flex items-center gap-1 no-print">
+        <button onclick="showHistory()" class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </button>
+        <button onclick="showPrivacy()" class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+        </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8 print-bg">
-    <!-- 主页视图 -->
-    <section id="view-home" class="space-y-8">
-      <div class="space-y-2">
-        <h1 class="text-2xl font-bold">心理健康评估中心</h1>
-        <p class="text-gray-600">科学、专业的心理健康自测工具，帮助您了解和改善心理健康状态。</p>
+  <!-- Main -->
+  <main class="flex-1 pt-14 pb-6 safe-bottom">
+    
+    <!-- HOME -->
+    <section id="view-home" class="max-w-2xl mx-auto px-4 py-6">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">探索内心，遇见更好的自己</h1>
+        <p class="text-gray-500 text-sm md:text-base max-w-md mx-auto">精选专业心理学量表，科学了解当下的心理状态</p>
       </div>
-      <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-      <div id="history-block" class="space-y-3">
-        <h2 class="text-xl font-semibold">评估历史</h2>
-        <div id="history-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      </div>
-    </section>
-
-    <!-- 测试视图 -->
-    <section id="view-test" class="hidden">
-      <div class="flex items-center justify-between mb-6">
-        <button id="backHomeFromTest" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          返回首页
-        </button>
-        <div class="flex items-center space-x-2">
-          <div class="text-sm text-gray-600">进度</div>
-          <div class="w-32 bg-gray-200 rounded-full h-2">
-            <div id="progress-bar" class="h-2 bg-emerald-500 rounded-full transition-all duration-300" style="width:0%"></div>
-          </div>
-          <div id="progress-text" class="text-sm text-gray-600">0/0</div>
+      <div id="category-filter" class="flex gap-2 overflow-x-auto pb-3 mb-6 -mx-4 px-4"></div>
+      <div id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      <div id="stats-summary" class="mt-8 p-4 bg-white rounded-2xl border border-gray-100 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-gray-800">我的测评</h3>
+          <button onclick="showHistory()" class="text-sm text-emerald-600 font-medium">查看全部</button>
         </div>
-      </div>
-      
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <div class="mb-6">
-          <h2 id="test-title" class="text-2xl font-bold text-gray-900"></h2>
-          <p id="test-desc" class="text-gray-600 mt-2"></p>
-        </div>
-        
-        <form id="questions-form" class="space-y-6"></form>
-        
-        <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-          <button id="reset-btn" type="button" class="inline-flex items-center px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
-            清空选择
-          </button>
-          <button id="submit-btn" class="inline-flex items-center px-6 py-2 rounded-md text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
-            提交并查看结果
-          </button>
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div><div id="stat-total" class="text-2xl font-bold text-gray-900">0</div><div class="text-xs text-gray-400">总次数</div></div>
+          <div><div id="stat-scales" class="text-2xl font-bold text-gray-900">0</div><div class="text-xs text-gray-400">量表种类</div></div>
+          <div><div id="stat-streak" class="text-2xl font-bold text-gray-900">0</div><div class="text-xs text-gray-400">连续天数</div></div>
         </div>
       </div>
     </section>
 
-    <!-- 结果视图 -->
-    <section id="view-result" class="hidden">
-      <div class="flex items-center justify-between mb-6">
-        <button id="backHomeFromResult" class="no-print inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          返回首页
-        </button>
-        <div class="flex items-center space-x-2 no-print">
-          <button id="retakeBtn" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
-            重新作答
+    <!-- TEST -->
+    <section id="view-test" class="hidden max-w-xl mx-auto px-4 py-4 min-h-[calc(100vh-56px)] flex flex-col">
+      <div class="mb-6 no-print">
+        <div class="flex items-center gap-3 mb-3">
+          <button onclick="exitTest()" class="p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
           </button>
-          <button id="printBtn" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-            </svg>
-            打印/保存 PDF
-          </button>
+          <div class="flex-1">
+            <div class="flex justify-between text-xs font-medium text-gray-500 mb-1.5">
+              <span id="test-title"></span>
+              <span id="progress-text">1/9</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+              <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-8">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 id="result-title" class="text-2xl font-bold text-gray-900"></h2>
-            <p class="text-gray-600 mt-1">结果仅供参考，如有困扰请尽快寻求专业帮助。</p>
-          </div>
-          <div class="text-right">
-            <div id="result-score" class="text-3xl font-bold text-gray-900"></div>
-            <div id="result-severity" class="mt-2 inline-block px-3 py-1 rounded text-sm"></div>
-          </div>
-        </div>
-        
-        <div id="safety-note" class="hidden rounded-lg border border-red-200 bg-red-50 text-red-800 p-4"></div>
-        
-        <div>
-          <h3 class="font-semibold text-gray-900 mb-3">建议与指导</h3>
-          <div id="result-advice" class="prose prose-sm max-w-none text-gray-700"></div>
-        </div>
-        
-        <div>
-          <h3 class="font-semibold text-gray-900 mb-3">参考文献</h3>
-          <ul id="result-citations" class="list-disc pl-5 space-y-2 text-sm"></ul>
-        </div>
-        
-        <div>
-          <h3 class="font-semibold text-gray-900 mb-3">作答明细</h3>
-          <div id="result-detail" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </div>
+      <div class="flex-1 flex flex-col">
+        <div id="question-container" class="flex-1"></div>
+      </div>
+      <div class="flex items-center justify-between pt-4 mt-auto no-print">
+        <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-all" disabled>上一题</button>
+        <div id="question-dots" class="flex gap-1.5"></div>
+        <button id="next-btn" onclick="nextQuestion()" class="px-4 py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-all" disabled>下一题</button>
       </div>
     </section>
 
-    <!-- 健康仪表板视图 -->
-    <section id="view-dashboard" class="hidden">
-      <div class="flex items-center justify-between mb-6">
-        <button id="backHomeFromDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          返回首页
+    <!-- RESULT -->
+    <section id="view-result" class="hidden max-w-xl mx-auto px-4 py-4">
+      <button onclick="goHome()" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4 no-print">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+        返回首页
+      </button>
+      <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 overflow-hidden mb-6">
+        <div class="p-6 md:p-8 flex flex-col items-center text-center">
+          <div class="relative w-36 h-36 mb-4">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" stroke="#f3f4f6" stroke-width="2.5"/>
+              <circle id="score-ring" class="meter-ring" cx="18" cy="18" r="16" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="0, 100"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="result-emoji" class="text-3xl mb-1">😊</span>
+              <span id="result-score" class="text-2xl font-bold text-gray-900"></span>
+            </div>
+          </div>
+          <h2 id="result-title" class="text-lg font-medium text-gray-500 mb-2"></h2>
+          <div id="result-level-badge" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold"></div>
+        </div>
+        <div class="bg-gray-50/80 border-t border-gray-100 p-6">
+          <h4 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            建议与指导
+          </h4>
+          <div id="result-advice" class="text-sm text-gray-600 leading-relaxed"></div>
+          <div id="safety-alert" class="hidden mt-4 p-4 rounded-xl bg-red-50 border border-red-100 text-sm text-red-700 flex items-start gap-3">
+            <svg class="w-5 h-5 flex-shrink-0 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>
+            <span id="safety-text"></span>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-6 no-print">
+        <button onclick="retakeTest()" class="flex items-center justify-center gap-2 px-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-gray-700 font-medium hover:bg-gray-50 transition-all">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+          重新测试
         </button>
-        <div class="flex items-center space-x-2">
-          <button id="exportDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white border border-gray-300 hover:bg-gray-50">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            导出报告
-          </button>
-          <button id="refreshDashboard" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            刷新数据
-          </button>
-        </div>
+        <button onclick="showShareModal()" class="flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl font-medium shadow-lg shadow-emerald-200/50 hover:shadow-emerald-300/50 transition-all">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" /></svg>
+          生成分享卡片
+        </button>
       </div>
-      
-      <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-bold text-gray-900">心理健康仪表板</h2>
-          <div class="text-sm text-gray-600">
-            数据更新时间: <span id="dashboard-update-time">--</span>
-          </div>
-        </div>
-        <p class="text-gray-600">综合展示您的心理健康状况和多维度分析，帮助您更好地了解自己的心理状态。</p>
-      </div>
-      
-      <!-- 仪表板统计卡片 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">总体心理健康</p>
-              <p id="overall-wellbeing" class="text-2xl font-bold text-gray-900">--</p>
-            </div>
-            <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">抑郁风险</p>
-              <p id="depression-risk" class="text-2xl font-bold text-gray-900">--</p>
-            </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">焦虑水平</p>
-              <p id="anxiety-level" class="text-2xl font-bold text-gray-900">--</p>
-            </div>
-            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-        
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">压力指数</p>
-              <p id="stress-index" class="text-2xl font-bold text-gray-900">--</p>
-            </div>
-            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- 图表区域 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">心理健康趋势</h3>
-          <div id="mental-health-trend-chart" class="h-64"></div>
-        </div>
-        
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">多维度评估雷达图</h3>
-          <div id="wellbeing-radar-chart" class="h-64"></div>
-        </div>
-      </div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">各量表得分对比</h3>
-          <div id="scale-comparison-chart" class="h-64"></div>
-        </div>
-        
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">情绪热力图</h3>
-          <div id="emotion-heatmap" class="h-64"></div>
-        </div>
-      </div>
-      
-      <!-- 详细数据表格 -->
-      <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">历史评估记录</h3>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">评估日期</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">量表类型</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">得分</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">严重程度</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">建议</th>
-              </tr>
-            </thead>
-            <tbody id="assessment-history-tbody" class="bg-white divide-y divide-gray-200">
-              <!-- 历史记录将通过JavaScript动态生成 -->
-            </tbody>
-          </table>
+      <button onclick="toggleDetail()" class="w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 text-gray-600 hover:bg-gray-50 transition-colors">
+        <span class="font-medium">查看详细作答</span>
+        <svg id="detail-chevron" class="w-5 h-5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+      </button>
+      <div id="detail-section" class="hidden mt-4 space-y-4">
+        <div id="result-detail" class="space-y-2"></div>
+        <div class="pt-4 border-t border-gray-100">
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">参考文献</h4>
+          <ul id="result-citations" class="text-xs text-gray-500 space-y-1"></ul>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="border-t border-gray-200 bg-white">
-    <div class="max-w-5xl mx-auto px-4 py-6 text-sm text-gray-600">
-      本网站不收集可识别个人信息，作答数据仅存储在您的浏览器设备中。结果不构成医疗建议，如有明显不适，请联系专业医生或心理咨询师。
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-100 py-6 no-print">
+    <div class="max-w-2xl mx-auto px-4 text-center">
+      <p class="text-xs text-gray-400">MindSelf Studio · 本站内容仅作科普与自我探索，不构成医疗建议</p>
     </div>
   </footer>
 
-  <div id="privacyModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50">
-    <div class="bg-white max-w-lg w-full mx-4 rounded-xl p-6 space-y-4">
-      <h3 class="text-lg font-semibold">隐私与免责声明</h3>
-      <div class="text-sm text-gray-700 space-y-2">
-        <p>本工具为科普性质的自我筛查工具，不会上传您的答案，仅使用浏览器本地存储保存历史记录。结果不能替代专业诊断与治疗。</p>
-        <p>如出现自伤或伤人想法，或情绪明显影响到生活与工作，请尽快寻求专业帮助或联系当地应急援助。</p>
+  <!-- History Modal -->
+  <div id="history-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40 modal-backdrop" onclick="hideHistory()"></div>
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] overflow-hidden bottom-sheet safe-bottom">
+      <div class="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
+        <h3 class="text-lg font-bold">历史记录</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="clearHistory()" class="text-sm text-red-500 font-medium px-3 py-1.5 hover:bg-red-50 rounded-lg transition-colors">清空</button>
+          <button onclick="hideHistory()" class="p-1.5 rounded-lg hover:bg-gray-100">
+            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
       </div>
-      <div class="text-right">
-        <button id="privacyClose" class="inline-flex items-center px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700">我已知悉</button>
+      <div id="history-list" class="p-4 space-y-3 overflow-y-auto max-h-[60vh]"></div>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div id="share-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40 modal-backdrop" onclick="hideShareModal()"></div>
+    <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-lg font-bold">分享卡片</h3>
+        <button onclick="hideShareModal()" class="p-1.5 rounded-lg hover:bg-gray-100">
+          <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
       </div>
+      <div class="px-4 py-3 border-b border-gray-100">
+        <div class="flex gap-2 overflow-x-auto">
+          <button onclick="setCardStyle('gradient')" class="card-style-btn ring-2 ring-emerald-500 flex-shrink-0 w-8 h-8 rounded-full border-2 border-white shadow-md" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></button>
+          <button onclick="setCardStyle('calm')" class="card-style-btn flex-shrink-0 w-8 h-8 rounded-full border-2 border-white shadow-md" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></button>
+          <button onclick="setCardStyle('warm')" class="card-style-btn flex-shrink-0 w-8 h-8 rounded-full border-2 border-white shadow-md" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);"></button>
+          <button onclick="setCardStyle('cool')" class="card-style-btn flex-shrink-0 w-8 h-8 rounded-full border-2 border-white shadow-md" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);"></button>
+          <button onclick="setCardStyle('nature')" class="card-style-btn flex-shrink-0 w-8 h-8 rounded-full border-2 border-white shadow-md" style="background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);"></button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4">
+        <div id="share-card-preview" class="rounded-2xl p-6 text-white shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);">
+          <div class="text-center mb-6">
+            <div class="text-4xl mb-2" id="share-emoji">😊</div>
+            <h3 id="share-title" class="text-lg font-bold opacity-90 mb-1"></h3>
+            <div id="share-level" class="text-2xl font-bold"></div>
+          </div>
+          <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 mb-4">
+            <div class="flex justify-between items-center">
+              <span class="text-sm opacity-80">测评得分</span>
+              <span id="share-score" class="text-xl font-bold"></span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347" /></svg>
+              </div>
+              <span class="text-xs opacity-70">MindSelf Studio</span>
+            </div>
+            <div class="text-xs opacity-70" id="share-date"></div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/20 flex items-center justify-center gap-3">
+            <canvas id="qr-code" class="w-16 h-16 rounded-lg bg-white p-1"></canvas>
+            <div class="text-xs opacity-70 text-left">
+              <div class="font-medium mb-1">扫码体验</div>
+              <div>探索内心世界</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-gray-100 grid grid-cols-2 gap-3">
+        <button onclick="downloadCard()" class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 rounded-xl text-gray-700 font-medium hover:bg-gray-200 transition-all">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+          保存图片
+        </button>
+        <button onclick="shareCard()" class="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 rounded-xl text-white font-medium hover:bg-emerald-600 transition-all">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314" /></svg>
+          分享
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Modal -->
+  <div id="privacy-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50 opacity-0 transition-opacity modal-backdrop">
+    <div class="modal-content bg-white max-w-md w-full mx-4 rounded-2xl shadow-2xl p-6 space-y-4 transform scale-95 transition-transform">
+      <div class="text-center">
+        <div class="h-12 w-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900">隐私与安全</h3>
+      </div>
+      <div class="text-sm text-gray-600 space-y-3 leading-relaxed">
+        <p><strong>本地存储：</strong>所有数据仅存储在您的浏览器中，不会上传至服务器。</p>
+        <p><strong>仅供参考：</strong>测试结果仅用于心理健康初步筛查，不能替代专业诊断。</p>
+        <p><strong>紧急求助：</strong>如有自伤或伤害他人的念头，请立即拨打急救电话或前往医院。</p>
+      </div>
+      <button onclick="hidePrivacy()" class="w-full py-3 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors">我已知悉</button>
     </div>
   </div>
 
