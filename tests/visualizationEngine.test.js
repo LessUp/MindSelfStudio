@@ -1,5 +1,5 @@
 // 数据可视化引擎单元测试
-const { VisualizationEngine } = require('../src/visualization/visualizationEngine.js');
+import { VisualizationEngine } from '../src/visualization/visualizationEngine.js';
 
 // 模拟 Chart.js
 class MockChart {

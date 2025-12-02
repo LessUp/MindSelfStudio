@@ -431,4 +431,4 @@ const DASS_21_CITATIONS = [
 ];
 
 // 导出模块
-module.exports = { DASS_21_SCALE, DASS21ScoringEngine, DASS_21_CITATIONS };
+export { DASS_21_SCALE, DASS21ScoringEngine, DASS_21_CITATIONS };

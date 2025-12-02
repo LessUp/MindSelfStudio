@@ -1,5 +1,5 @@
 // DASS-21 量表单元测试
-const { DASS21ScoringEngine, DASS_21_SCALE, DASS_21_CITATIONS: DASS21_CITATIONS } = require('../src/scales/dass21.js');
+import { DASS21ScoringEngine, DASS_21_SCALE, DASS_21_CITATIONS as DASS21_CITATIONS } from '../src/scales/dass21.js';
 
 describe('DASS-21 量表测试', () => {
   let engine;

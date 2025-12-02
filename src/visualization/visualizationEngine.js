@@ -706,4 +706,4 @@ class VisualizationEngine {
 }
 
 // 导出模块
-module.exports = { VisualizationEngine };
+export { VisualizationEngine };

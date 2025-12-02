@@ -431,4 +431,4 @@ const WHO5_CITATIONS = [
 ];
 
 // 导出模块
-module.exports = { WHO5_SCALE, WHO5ScoringEngine, WHO5_CITATIONS };
+export { WHO5_SCALE, WHO5ScoringEngine, WHO5_CITATIONS };

@@ -1,5 +1,5 @@
 // 可视化引擎额外单元测试 - 提高覆盖率
-const { VisualizationEngine } = require('../src/visualization/visualizationEngine.js');
+import { VisualizationEngine } from '../src/visualization/visualizationEngine.js';
 
 // 模拟 Chart.js
 class MockChart {

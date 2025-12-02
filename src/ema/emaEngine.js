@@ -129,13 +129,19 @@ class EMAEngine {
   // 设置通知系统
   setupNotificationSystem() {
     // 检查浏览器通知权限
-    if ('Notification' in window) {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'granted') {
         this.notificationEnabled = true;
-      } else if (Notification.permission !== 'denied') {
+      } else if (
+        Notification.permission !== 'denied' &&
+        typeof Notification.requestPermission === 'function'
+      ) {
         Notification.requestPermission().then(permission => {
           this.notificationEnabled = permission === 'granted';
         });
+      } else {
+        // 在不支持 requestPermission 的环境下，保持通知功能关闭
+        this.notificationEnabled = false;
       }
     }
     
@@ -918,4 +924,4 @@ const EMA_FORM_CONFIG = {
 };
 
 // 导出模块
-module.exports = { EMAEngine, EMA_FORM_CONFIG };
+export { EMAEngine, EMA_FORM_CONFIG };

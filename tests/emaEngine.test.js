@@ -1,5 +1,5 @@
 // EMA (生态瞬时评估) 引擎单元测试
-const { EMAEngine, EMA_FORM_CONFIG } = require('../src/ema/emaEngine.js');
+import { EMAEngine, EMA_FORM_CONFIG } from '../src/ema/emaEngine.js';
 
 // 确保 Notification API 可用
 if (!global.Notification) {

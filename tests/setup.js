@@ -1,7 +1,9 @@
+import { jest } from '@jest/globals';
 // 测试环境设置
 // 模拟 DOM API 和全局对象
 
 // Access jest globally since we're in a Jest environment
+global.jest = jest;
 
 // 模拟 localStorage
 const localStorageMock = {

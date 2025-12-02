@@ -1,5 +1,5 @@
 // WHO-5 幸福感量表单元测试
-const { WHO5ScoringEngine, WHO5_SCALE, WHO5_CITATIONS } = require('../src/scales/who5.js');
+import { WHO5ScoringEngine, WHO5_SCALE, WHO5_CITATIONS } from '../src/scales/who5.js';
 
 describe('WHO-5 幸福感量表测试', () => {
   let engine;

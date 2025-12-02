@@ -1,5 +1,5 @@
 // EMA (生态瞬时评估) 引擎额外单元测试 - 提高覆盖率
-const { EMAEngine, EMA_FORM_CONFIG } = require('../src/ema/emaEngine.js');
+import { EMAEngine, EMA_FORM_CONFIG } from '../src/ema/emaEngine.js';
 
 describe('EMA 引擎高级功能测试', () => {
   let engine;
